@@ -6,10 +6,7 @@ import model.dao.SellerDao;
 import model.entities.Department;
 import model.entities.Seller;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +22,34 @@ public class SellerDaoJDBC implements SellerDao {
 
     @Override
     public void insert(Seller obj) {
+        PreparedStatement st = null;
 
+        try{
+            st = conn.prepareStatement("INSERT INTO seller\n" +
+                    "(Name, Email, BirthDate, BaseSalary, DepartmentId) \n" +
+                    "VALUES \n" +
+                    "(%s, %s, ?, %d, %d)".formatted(obj.getName(), obj.getEmail()
+                    , obj.getBaseSalary(), obj.getDepartment().getId()), Statement.RETURN_GENERATED_KEYS);
+
+            st.setDate(1, new java.sql.Date(obj.getBirthDate()
+                    .getTime()));
+
+            int rowsAffected = st.executeUpdate();
+
+            if(rowsAffected > 0){
+                ResultSet rs = st.getGeneratedKeys();
+                if(rs.next()){
+                    obj.setId(rs.getInt(1));
+                }
+                DB.closeResultSet(rs);
+            }else {
+                throw new DbException("Error, No rows Affected");
+            }
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        }finally {
+            DB.closeStatement(st);
+        }
     }
 
     @Override
@@ -80,7 +104,40 @@ public class SellerDaoJDBC implements SellerDao {
 
     @Override
     public List<Seller> findAll() {
-        return null;
+        PreparedStatement st = null;
+        ResultSet rs = null;
+
+        try {
+            st = conn.prepareStatement(
+                    "SELECT seller.*,department.Name as DepName FROM seller INNER JOIN department ON seller.DepartmentId = department.Id ORDER BY Name"
+            );
+
+            rs = st.executeQuery();
+
+            List<Seller> list = new ArrayList<>();
+            Map<Integer, Department> map = new HashMap<>();
+
+            while (rs.next()) {
+
+                Department dep = map.get(rs.getInt("DepartmentId"));
+
+                if (dep == null) {
+                    dep = buildDepartment(rs);
+                    map.put(rs.getInt("DepartmentId"), dep);
+                }
+
+
+                Seller obj = buildSeller(rs, dep);
+
+                list.add(obj);
+            }
+            return list;
+        } catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        } finally {
+            DB.closeStatement(st);
+            DB.closeResultSet(rs);
+        }
     }
 
     @Override
