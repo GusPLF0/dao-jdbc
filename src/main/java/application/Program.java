@@ -28,5 +28,14 @@ public class Program {
         list = sellerDao.findAll();
 
         System.out.println(Arrays.toString(list.toArray()) + "\n");
+
+        System.out.println("=== Test4 ===");
+
+        seller = sellerDao
+                .findById(1);
+        seller.setName("Martha Waine");
+        sellerDao.update(seller);
+        System.out.println("Completed");
+
     }
 }
