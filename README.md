@@ -1,6 +1,6 @@
 # Sistema de Gerenciamento de Departamentos e Vendedores 💲 
 
-Este é um projeto Java que implementa um sistema de gerenciamento de departamentos e vendedores. O objetivo do projeto é fornecer um programa para realizar operações CRUD (criar, ler, atualizar e excluir) em departamentos e vendedores.
+Este é um projeto Java que implementa um sistema de gerenciamento de departamentos e vendedores usando JPA. O objetivo do projeto é fornecer um programa para realizar operações CRUD (criar, ler, atualizar e excluir) em departamentos e vendedores.
 
 ## Recursos 💻
 
